@@ -1,4 +1,9 @@
 {
   "name": "eglaf/egf-base",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "autoload": {
+    "psr-0": {
+      "Egf": "vendor/eglaf/egf/base/"
+    }
+  }
 }
