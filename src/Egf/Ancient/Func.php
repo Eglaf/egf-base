@@ -305,7 +305,7 @@ class Func {
      * Transform entities into JSON.
      * $this->_getSerializer()->normalize($enObject, 'json');
      * $this->_getSerializer()->normalize($aenObjects, 'json');
-     * @return Serializer
+     * @return \Symfony\Component\Serializer\Serializer
      * @url http://symfony.com/doc/current/components/serializer.html
      */
     public static function getSerializer() {
