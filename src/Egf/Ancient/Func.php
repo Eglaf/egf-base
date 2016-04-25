@@ -26,7 +26,7 @@ class Func {
             return (is_numeric($xVar) && !is_float($xVar) && (intval($xVar) > 0) && (intval($xVar) === $xVar));
         }
         else {
-            return (is_integer(intval($xVar)) && ( !is_float($xVar) || $xVar == intval($xVar)) && (intval($xVar) > 0));
+            return (is_integer(intval($xVar)) && $xVar == intval($xVar) && (intval($xVar) > 0));
         }
     }
 
@@ -302,6 +302,24 @@ class Func {
      *************************************************************************************************************************************************************/
 
     /**
+     * Transform entities into JSON.
+     * $this->_getSerializer()->normalize($enObject, 'json');
+     * $this->_getSerializer()->normalize($aenObjects, 'json');
+     * @return Serializer
+     * @url http://symfony.com/doc/current/components/serializer.html
+     */
+    public static function getSerializer() {
+        $oClassMetadataFactory = new \Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory(new \Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader(new \Doctrine\Common\Annotations\AnnotationReader()));
+        $oNormalizer = (new \Symfony\Component\Serializer\Normalizer\ObjectNormalizer($oClassMetadataFactory))
+            ->setCircularReferenceLimit(0)
+            ->setCircularReferenceHandler(function ($enObject) {
+                return (method_exists($enObject, "getId") ? $enObject->getId() : "object-without-id");
+            });
+
+        return new \Symfony\Component\Serializer\Serializer([$oNormalizer], [new \Symfony\Component\Serializer\Encoder\JsonEncoder()]);
+    }
+
+    /**
      * Call a method of an object by string of the method.
      * @param object $oObject     Object.
      * @param string $sMethod     Method of object.
@@ -447,120 +465,6 @@ class Func {
         else {
             throw new \Exception("Object doesn't have getter! \n Object: " . get_class($enObject) . " \n Method: get" . ucfirst($sProperty) . " \n\n ");
         }
-    }
-
-
-
-    /**************************************************************************************************************************************************************
-     *                                                          **         **         **         **         **         **         **         **         **         **
-     * Deprecated                                                 **         **         **         **         **         **         **         **         **         **
-     *                                                          **         **         **         **         **         **         **         **         **         **
-     *************************************************************************************************************************************************************/
-
-    /**
-     * Convert array of entities into json array with key and values.
-     * @param array|object $xEntities Array of entities or a single entity object.
-     * @param array        $aMethods  Array of needed methods and json key and value formatting.
-     *                                - The simple solution if it's a string. Then it loads that entity field into the json object with that key.
-     *                                - If the field isn't same as the key, then use: array("from" => "fieldName", "to" => "jsonKey")
-     *                                - If the field has to be formatted as a date, then use: array("dateFormat" => "Y-m-d H:i", "from" => "fieldName", "to" => "jsonKey")
-     *                                - If the field is an entity and you need a field of that, then use: array("entityOne" => "id", "from" => "fieldName", "to" => "jsonKeyId") // In this
-     *                                case the json'll have a jsonKeyId with the fieldName->getId() value.
-     *                                - If the field is an ArrayCollection, then use: array("entityMany" => array("bothEntityAttrAndJsonKey", "entityAttr" => "jsonKey"), "from" =>
-     *                                "fieldName", "to" => "jsonKeyId")
-     * @param bool         $bToString [Default: true] It true, it give back string instead of array.
-     * @return string|array Give back the entities in json encoded string or array format.
-     * @todo entityOne as array.
-     * @todo ArrayCollection could be useful too.
-     * @todo EntityOneChain to call more entityOne after each other.
-     * @todo Frack this sheet... create a whole class or service from it... when you have some free time. ...
-     * @todo for service... setData(stuffs) if (stuffs nem array or arrayColl) stuffs = array(stuffs) ... foreach stuffs
-     */
-    public static function getJsonOfEntities($xEntities, $aMethods, $bToString = TRUE) {
-        $xEntities = (method_exists($xEntities, "toArray") ? $xEntities->toArray() : $xEntities);
-        $aResult = array();
-        $iKey = 0;
-
-        if (is_array($xEntities)) {
-            foreach ($xEntities as $enTity) {
-                $aResult[$iKey] = static::getJsonOfEntity($enTity, $aMethods);
-                $iKey++;
-            }
-        }
-        else if (is_object($xEntities) and method_exists($xEntities, "getId")) {
-            $aResult = static::getJsonOfEntity($xEntities, $aMethods);
-        }
-
-        if ($bToString) {
-            return json_encode($aResult);
-        }
-        else {
-            return $aResult;
-        }
-    }
-
-    /**
-     * Part of the getJsonOfEntities public method.
-     * @param object $enTity   Entity.
-     * @param array  $aMethods Methods of the entity.
-     * @return array The result row.
-     */
-    private static function getJsonOfEntity($enTity, $aMethods) {
-        $aRow = array();
-
-        foreach ($aMethods as $xVal) {
-            if (is_array($xVal)) {
-                if (array_key_exists("from", $xVal) && array_key_exists("to", $xVal)) {
-                    // DateTime
-                    if (array_key_exists("dateFormat", $xVal)) {
-                        $oDate = static::entityGetField($enTity, $xVal["from"]);
-                        $aRow[$xVal["to"]] = ($oDate instanceof \DateTime ? $oDate->format($xVal["dateFormat"]) : "-");
-                    }
-                    // Entity One
-                    else if (array_key_exists("entityOne", $xVal)) {
-                        if (is_array($xVal["entityOne"])) {
-                            throw new \Exception("TODO entityOne attribute as array in... " . __METHOD__); // Something like the entityMany
-                        }
-                        else {
-                            $aRow[$xVal["to"]] = static::entityGetField(static::entityGetField($enTity, $xVal["from"]), $xVal["entityOne"]);
-                        }
-                    }
-                    // Entity Many
-                    else if (array_key_exists("entityMany", $xVal)) {
-                        $aMany = array();
-                        foreach (static::entityGetField($enTity, $xVal["from"]) as $enMany) {
-                            if (is_array($xVal["entityMany"])) {
-                                $aAttributes = array();
-                                foreach ($xVal["entityMany"] as $sKey => $sAttr) {
-                                    $aAttributes[$sAttr] = (is_numeric($sKey) ? static::entityGetField($enMany, $sAttr) : static::entityGetField($enMany, $sKey));
-                                }
-                                $aMany[] = $aAttributes;
-                            }
-                            else {
-                                $aMany[] = static::entityGetField($enMany, $xVal["entityMany"]);
-                            }
-                        }
-                        $aRow[$xVal["to"]] = $aMany;
-                    }
-                    // Simple attribute (given as array)
-                    else {
-                        $aRow[$xVal["to"]] = static::entityGetField($enTity, $xVal["from"]);
-                    }
-                }
-                else {
-                    throw new \Exception("getJsonOfEntities 2nd parameter (array of methods) problem. Array given as method, but it doesn't have 'from' and 'to' key!");
-                }
-            }
-            // Simple attribute (given as string)
-            else if (is_string($xVal)) {
-                $aRow[$xVal] = static::entityGetField($enTity, $xVal);
-            }
-            else {
-                throw new \Exception("getJsonOfEntities 2nd parameter (array of methods) has to have string or array(from, to) as values!");
-            }
-        }
-
-        return $aRow;
     }
 
 }
