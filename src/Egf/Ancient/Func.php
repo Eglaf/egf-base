@@ -142,14 +142,14 @@ class Func {
     /**
      * It replace the dynamic parameters by the value that should be there.. Dynamic parameters are for example: "{{ id }}", "{{ status->id }}".
      * @param string $sToReplace The string to extend with values. It has to be translated by the SF2 service first if it's needed.
-     * @param object $enObject The (possibly) entity object to get the data from.
+     * @param object $enObject   The (possibly) entity object to get the data from.
      * @return string The same string but the dynamic parameters were replaced by the data from the entity object.
      */
     public static function extendStringWithDynamicParameters($sToReplace, $enObject) {
         $aPlaceholders = static::getPlaceholdersFromString($sToReplace);
         $aValues = [];
         // Iterate the dynamic parameters.
-        foreach($aPlaceholders as $sKey) {
+        foreach ($aPlaceholders as $sKey) {
             // Trim the string.
             $sTrimmedKey = trim($sKey, "{ }");
             // If the entity has a method like this or it's a property chain , then load the data.
@@ -169,6 +169,18 @@ class Func {
         return $sToReplace;
     }
 
+    /**
+     * Transform string into camelCase version.
+     * @param string $sOriginal The string to transform.
+     * @param bool   $bUcFirst  Decide if the first character should be upper case or not. Default value is false.
+     * @param string $sRemove   The characters those should be removed and count as space. Default is dash and underline.
+     * @return string The camelCased string.
+     */
+    public static function toCamelCase($sOriginal, $bUcFirst = FALSE, $sRemove = '-_') {
+        $sResult = str_replace(str_split($sRemove), '', ucwords($sOriginal, $sRemove));
+
+        return ($bUcFirst ? $sResult : lcfirst($sResult));
+    }
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -186,7 +198,7 @@ class Func {
     public static function inArray($aHaystack, $xNeedle, $bTypeCheck = FALSE) {
         if (is_array($aHaystack)) {
             foreach ($aHaystack as $xItem) {
-                if (($bTypeCheck && $xItem === $xNeedle) || (!$bTypeCheck && $xItem == $xNeedle)) {
+                if (($bTypeCheck && $xItem === $xNeedle) || ( !$bTypeCheck && $xItem == $xNeedle)) {
                     return TRUE;
                 }
             }
@@ -303,8 +315,8 @@ class Func {
 
     /**
      * Transform entities into JSON.
-     * $this->_getSerializer()->normalize($enObject, 'json');
-     * $this->_getSerializer()->normalize($aenObjects, 'json');
+     * $this->getSerializer()->normalize($enObject, 'json');
+     * $this->getSerializer()->normalize($aenObjects, 'json');
      * @return \Symfony\Component\Serializer\Serializer
      * @url http://symfony.com/doc/current/components/serializer.html
      */
@@ -370,7 +382,7 @@ class Func {
 
     /**
      * Call a get method of entity by string of dataMember.
-     * @param object $oEntity     Entity object.
+     * @param object $oEntity    Entity object.
      * @param string $sMethod    DataMember of entity. If some words are separated by "->", then it call the properties recursivly.
      * @param array  $parameters [Default: null] Parameters of get method.
      * @return mixed Result of the get method.
