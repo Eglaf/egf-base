@@ -1,6 +1,6 @@
 {
   "name": "eglaf/egf-base",
-  "version": "0.0.1",
+  "version": "dev-master",
   "autoload": {
     "psr-0": {
       "Egf": "src/"

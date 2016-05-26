@@ -32,12 +32,12 @@ class Func {
 
     /**
      * Generate a random Float number.
-     * @param float $min      The minimum value.
-     * @param float $max      The maximum value.
+     * @param float|integer $min      The minimum value.
+     * @param float|integer $max      The maximum value.
      * @param int   $decimals The length of result.
      * @return float Random float number.
      */
-    public static function getRandomFloat($min, $max, $decimals = 0) {
+    public static function getRandomFloat($min = 0, $max = 1, $decimals = 2) {
         $scale = pow(10, $decimals);
 
         return mt_rand($min * $scale, $max * $scale) / $scale;
