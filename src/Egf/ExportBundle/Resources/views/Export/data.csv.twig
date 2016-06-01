@@ -1,0 +1,8 @@
+{% for sHeader in aHeaders %}
+{{ sHeader }}{% if not loop.last %};{% endif %}
+{% endfor %}
+
+{% for aData in aaData %}
+{% for sData in aData %}{{ sData }}{% if not loop.last %};{% endif %}{% endfor %}
+
+{% endfor %}

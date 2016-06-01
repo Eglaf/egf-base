@@ -1,0 +1,17 @@
+Service export.csv
+
+    $this->get("export.csv")
+            ->setData($this->getDm()->getRepository("AnySomeBundle:Something")->findAll())                              // The source data. It accepts array of entities and array of associative arrays.
+            ->addData([                                                                                                 // Add another row to the data source. It doesn't have to be the same type as the already set data.
+                "someString" => "something",
+                "someString2" => "something2",
+                "someDate" => new \DateTime(),
+                "someEntity" => $this->getDm()->find("AnySomeBundle:SomethingElse", 1),
+            ])
+            ->setFileName("someFileName")                                                                               // The file name... if the original isn't acceptable.
+            ->addColumn("someString")                                                                                   // Simple text cell.
+            ->addColumn("someString2", null, "second_some_string")                                                      // Simple text cell (null) with rewritten header.
+            ->addColumn("dateOfBirth", (new ExportCol\Date())->setFormat("Y-m-d"))                                      // Date cell (Default format: Y-m-d
+            ->addColumn("someEntity", (new ExportCol\EntityOne()->setRelationPath(["somethingVeryElse", "text"])));     // EntityOne relations in a chain.
+
+    return $this->get("export.csv")->getResponse();                                                                     // Get response (Because of oroShit, the link to the action has to be target="_blank"

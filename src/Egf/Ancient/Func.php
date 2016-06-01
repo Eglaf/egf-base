@@ -34,10 +34,10 @@ class Func {
      * Generate a random Float number.
      * @param float|integer $min      The minimum value.
      * @param float|integer $max      The maximum value.
-     * @param int   $decimals The length of result.
+     * @param int           $decimals The length of result.
      * @return float Random float number.
      */
-    public static function getRandomFloat($min = 0, $max = 1, $decimals = 2) {
+    public static function getRandomFloat($min = 0.0, $max = 1.0, $decimals = 2) {
         $scale = pow(10, $decimals);
 
         return mt_rand($min * $scale, $max * $scale) / $scale;
@@ -170,17 +170,25 @@ class Func {
     }
 
     /**
-     * Transform string into camelCase version.
+     * Transform string into camelCase format.
      * @param string $sOriginal The string to transform.
-     * @param bool   $bUcFirst  Decide if the first character should be upper case or not. Default value is false.
      * @param string $sRemove   The characters those should be removed and count as space. Default is dash and underline.
      * @return string The camelCased string.
      */
-    public static function toCamelCase($sOriginal, $bUcFirst = FALSE, $sRemove = '-_') {
-        $sResult = str_replace(str_split($sRemove), '', ucwords($sOriginal, $sRemove));
-
-        return ($bUcFirst ? $sResult : lcfirst($sResult));
+    public static function toCamelCase($sOriginal, $sRemove = ' -_') {
+        return lcfirst(static::toStudlyCaps($sOriginal, $sRemove));
     }
+
+    /**
+     * Transform string into StudlyCaps format.
+     * @param string $sOriginal The string to transform.
+     * @param string $sRemove   The characters those should be removed and count as space. Default is dash and underline.
+     * @return mixed The StudyCapped string.
+     */
+    public static function toStudlyCaps($sOriginal, $sRemove = ' -_') {
+        return str_replace(str_split($sRemove), '', ucwords($sOriginal, $sRemove));
+    }
+
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -423,11 +431,7 @@ class Func {
      * @return bool True if entity is in ArrayCollection.
      */
     public static function inArrayCollection($enEntity, \Doctrine\ORM\PersistentCollection $acArrayCollection) {
-        if (in_array($enEntity, $acArrayCollection->toArray(), TRUE)) {
-            return TRUE;
-        }
-
-        return FALSE;
+        return in_array($enEntity, $acArrayCollection->toArray(), TRUE);
     }
 
     /**
@@ -450,6 +454,13 @@ class Func {
 
         return trim($sResult, "\\");
     }
+
+    
+    /**************************************************************************************************************************************************************
+     *                                                          **         **         **         **         **         **         **         **         **         **
+     * Private methods                                            **         **         **         **         **         **         **         **         **         **
+     *                                                          **         **         **         **         **         **         **         **         **         **
+     *************************************************************************************************************************************************************/
 
     /**
      * Recursively iterate on related entities until it get the final data.
