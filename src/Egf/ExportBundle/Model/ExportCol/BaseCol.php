@@ -2,6 +2,7 @@
 
 namespace Egf\ExportBundle\Model\ExportCol;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\EntityManager;
 use Egf\Ancient;
 
@@ -18,6 +19,11 @@ abstract class BaseCol {
     abstract public function getData();
 
     /**
+     * @var ContainerInterface It's what it looks like.
+     */
+    protected $oContainer;
+
+    /**
      * @var string $sKey The entityProperty of the array key. Depends on the stuff that needs to be exported.
      */
     private $sKey = "";
@@ -32,11 +38,23 @@ abstract class BaseCol {
      */
     protected $xData = null;
 
+
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
      * Setters                                                    **         **         **         **         **         **         **         **         **         **
      *                                                          **         **         **         **         **         **         **         **         **         **
      *************************************************************************************************************************************************************/
+
+    /**
+     * Set container.
+     * @param ContainerInterface $oContainer
+     * @return $this
+     */
+    public function setContainer($oContainer) {
+        $this->oContainer = $oContainer;
+
+        return $this;
+    }
 
     /**
      * Set key.
@@ -75,6 +93,15 @@ abstract class BaseCol {
      * Getters                                                    **         **         **         **         **         **         **         **         **         **
      *                                                          **         **         **         **         **         **         **         **         **         **
      *************************************************************************************************************************************************************/
+
+    /**
+     * Get service.
+     * @param $sServiceName
+     * @return object Service class.
+     */
+    protected function get($sServiceName) {
+        return $this->oContainer->get($sServiceName);
+    }
 
     /**
      * @return string The entity property or the array key.

@@ -89,6 +89,7 @@ class ExportCsvService extends Ancient\Service
             $oColumn = new ExportCol\Text();
         }
         $oColumn
+            ->setContainer($this->oContainer)
             ->setKey($sKey)
             ->setColumnHeader($sColumnHeader);
         $this->aoColumns[$sColumnHeader ? $sColumnHeader : $sKey] = $oColumn;

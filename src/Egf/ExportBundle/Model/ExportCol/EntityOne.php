@@ -1,6 +1,6 @@
 <?php
 
-namespace Ln\ExportBundle\Model\ExportCol;
+namespace Egf\ExportBundle\Model\ExportCol;
 
 use Egf\Ancient;
 

@@ -12,6 +12,6 @@ Service export.csv
             ->addColumn("someString")                                                                                   // Simple text cell.
             ->addColumn("someString2", null, "second_some_string")                                                      // Simple text cell (null) with rewritten header.
             ->addColumn("dateOfBirth", (new ExportCol\Date())->setFormat("Y-m-d"))                                      // Date cell (Default format: Y-m-d
-            ->addColumn("someEntity", (new ExportCol\EntityOne()->setRelationPath(["somethingVeryElse", "text"])));     // EntityOne relations in a chain.
+            ->addColumn("someEntity", (new ExportCol\EntityOne())->setRelationPath(["somethingVeryElse", "text"]));     // EntityOne relations in a chain.
 
     return $this->get("export.csv")->getResponse();                                                                     // Get response (Because of oroShit, the link to the action has to be target="_blank"

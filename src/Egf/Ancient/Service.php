@@ -28,7 +28,7 @@ abstract class Service {
     /**
      * Get service.
      * @param $sServiceName
-     * @return Service class.
+     * @return object Service class.
      */
     protected function get($sServiceName) {
         return $this->oContainer->get($sServiceName);
