@@ -51,15 +51,6 @@ class Func {
      *************************************************************************************************************************************************************/
 
     /**
-     * Check if the date is a valid or not. It checks only if the DateTime object can be created from this string. For example it doesn't throw error on 30th of February.
-     * @param string $sDateString String which is a date possibly.
-     * @return bool True if the string is valid.
-     */
-    public static function isDateTimeStringValid($sDateString) {
-        return (strlen($sDateString) >= 6 ? (bool)strtotime($sDateString) : FALSE);
-    }
-
-    /**
      * Generate a random string.
      * @param   int    $iLength Length of string. Default: 8.
      * @param   string $sType   Type of character pool. Default: alnum. Options: alnum, alpha, hexdec, numeric, nozero, distinct.
@@ -153,8 +144,8 @@ class Func {
             // Trim the string.
             $sTrimmedKey = trim($sKey, "{ }");
             // If the entity has a method like this or it's a property chain , then load the data.
-            if (static::hasEntityGetField($enObject, $sTrimmedKey) or strpos($sTrimmedKey, "->") !== FALSE) {
-                $aValues[$sKey] = static::entityGetField($enObject, $sTrimmedKey);
+            if (static::hasObjectGetMethod($enObject, $sTrimmedKey) or strpos($sTrimmedKey, "->") !== FALSE) {
+                $aValues[$sKey] = static::callObjectGetMethod($enObject, $sTrimmedKey);
             }
             // Method wasn't found and it's not a chain of properties.
             else {
@@ -317,6 +308,72 @@ class Func {
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
+     * DateTime                                                   **         **         **         **         **         **         **         **         **         **
+     *                                                          **         **         **         **         **         **         **         **         **         **
+     *************************************************************************************************************************************************************/
+
+    /**
+     * Gives back the given DateTime or convert the string to DateTime and gives back that. It accepts much more date formats. Integer is used as timestamp.
+     * @param \DateTime|string|integer|null $xDateTime A DateTime or string to convert to DateTime.
+     * @return \DateTime|null DateTime or null if variable cannot be converted.
+     */
+    public static function toDateTime($xDateTime = null)
+    {
+        if ($xDateTime instanceof \DateTime) {
+            return $xDateTime;
+        } elseif (is_integer($xDateTime)) {
+            return (new \DateTime())->setTimestamp($xDateTime);
+        } elseif (is_string($xDateTime)) {
+            if (static::isDateTimeStringValid($xDateTime)) { // Format accepted by default.
+                return new \DateTime($xDateTime);
+            } else { // Format isn't accepted by default.
+                $bWithTime = (13 < strlen(trim($xDateTime)));
+                $asDateSeparators = ['.', '. ', '-', '/', ' '];
+                $asDateTimeSeparators = [' '];
+                $asTimeSeparators = [':'];
+                foreach ($asDateSeparators as $sDateSep) {
+                    if ($bWithTime) { // It has time values too.
+                        foreach ($asDateTimeSeparators as $sDateTimeSep) {
+                            foreach ($asTimeSeparators as $sTimeSep) {
+                                foreach ([($sTimeSep . 's'), ''] as $sSeconds) {
+                                    $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateSep . $sDateTimeSep . 'H' . $sTimeSep . 'i' . $sSeconds);
+
+                                    $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
+                                    if ($dt instanceof \DateTime) {
+                                        return $dt;
+                                    }
+                                }
+                            }
+                        }
+                    } else { // It has date value only.
+                        foreach ([$sDateSep, ''] as $sDateEnd) {
+                            $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd);
+
+                            $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
+                            if ($dt instanceof \DateTime) {
+                                return $dt;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if the date is a valid or not. It checks only if the DateTime object can be created from this string. For example it doesn't throw error on 30th of February.
+     * @param string $sDateString String which is a date possibly.
+     * @return bool True if the string is valid.
+     */
+    public static function isDateTimeStringValid($sDateString) {
+        return (strlen($sDateString) >= 6 ? (bool)strtotime($sDateString) : FALSE);
+    }
+    
+
+    /**************************************************************************************************************************************************************
+     *                                                          **         **         **         **         **         **         **         **         **         **
      * Object                                                     **         **         **         **         **         **         **         **         **         **
      *                                                          **         **         **         **         **         **         **         **         **         **
      *************************************************************************************************************************************************************/
@@ -346,7 +403,7 @@ class Func {
      * @param array  $aParameters [Default: null] Parameters of method.
      * @return mixed Result of the method.
      */
-    public static function callClassMethod($oObject, $sMethod, $aParameters = array()) {
+    public static function callObjectMethod($oObject, $sMethod, $aParameters = array()) {
         if (method_exists($oObject, $sMethod)) {
             return call_user_func_array(array($oObject, $sMethod), (is_array($aParameters) ? $aParameters : array($aParameters)));
         }
@@ -361,7 +418,7 @@ class Func {
      * @param string $sProperty The property that should exist.
      * @return bool True if the entity has get field for property.
      */
-    public static function hasEntitySetField($enObject, $sProperty) {
+    public static function hasObjectSetMethod($enObject, $sProperty) {
         return method_exists($enObject, "set" . ucfirst($sProperty));
     }
 
@@ -372,10 +429,10 @@ class Func {
      * @param   array  $parameters [Default: null] Parameters of set method.
      * @return  mixed                              Result of set method.
      */
-    public static function entitySetField($entity, $method, $parameters = NULL) {
+    public static function callObjectSetMethod($entity, $method, $parameters = NULL) {
         $entitySetMethod = "set" . ucfirst($method);
 
-        return static::callClassMethod($entity, $entitySetMethod, $parameters);
+        return static::callObjectMethod($entity, $entitySetMethod, $parameters);
     }
 
     /**
@@ -384,7 +441,7 @@ class Func {
      * @param string $sProperty The property that should exist.
      * @return bool True if the entity has get field for property.
      */
-    public static function hasEntityGetField($enObject, $sProperty) {
+    public static function hasObjectGetMethod($enObject, $sProperty) {
         return method_exists($enObject, "get" . ucfirst($sProperty));
     }
 
@@ -395,15 +452,15 @@ class Func {
      * @param array  $parameters [Default: null] Parameters of get method.
      * @return mixed Result of the get method.
      */
-    public static function entityGetField($oEntity, $sMethod, $parameters = NULL) {
+    public static function callObjectGetMethod($oEntity, $sMethod, $parameters = NULL) {
         // Simple getter.
-        if (static::hasEntityGetField($oEntity, $sMethod)) {
+        if (static::hasObjectGetMethod($oEntity, $sMethod)) {
             $entityGetMethod = "get" . ucfirst($sMethod);
             if ($parameters) {
-                return static::callClassMethod($oEntity, $entityGetMethod, $parameters);
+                return static::callObjectMethod($oEntity, $entityGetMethod, $parameters);
             }
             else {
-                return static::callClassMethod($oEntity, $entityGetMethod);
+                return static::callObjectMethod($oEntity, $entityGetMethod);
             }
         }
         // If the getter method is a chain (relatedObject->secondRelatedObject->finalAttribute), then it load the data recursively.
@@ -464,7 +521,7 @@ class Func {
 
     /**
      * Recursively iterate on related entities until it get the final data.
-     * It's used in static::entityGetField() method.
+     * It's used in static::callObjectGetMethod() method.
      * @param object $enObject   The object that will have the next property.
      * @param array  $aFragments The chain of properties listed in an array.
      * @return string The result of property chain.
@@ -473,9 +530,9 @@ class Func {
         // First item in chain.
         $sProperty = array_shift($aFragments);
         // Check if the object has the getter.
-        if (static::hasEntityGetField($enObject, $sProperty)) {
+        if (static::hasObjectGetMethod($enObject, $sProperty)) {
             // Load data.
-            $xRelated = static::entityGetField($enObject, $sProperty);
+            $xRelated = static::callObjectGetMethod($enObject, $sProperty);
             // If it's an object and the chain isn't over, then it loads that data.
             if (is_object($xRelated) and count($aFragments)) {
                 return static::getPropertyRecursively($xRelated, $aFragments);
