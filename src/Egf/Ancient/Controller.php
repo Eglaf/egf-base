@@ -2,8 +2,9 @@
 
 namespace Egf\Ancient;
 
-use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller as SfController;
+use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManager;
 
 /**
  * Controller class to extend.
@@ -39,6 +40,14 @@ abstract class Controller extends SfController {
      */
     protected function getDm() {
         return $this->get("doctrine")->getManager();
+    }
+
+    /**
+     * Get Request.
+     * @return Request
+     */
+    protected function getRq() {
+        return $this->get('request_stack')->getCurrentRequest();
     }
 
 }
