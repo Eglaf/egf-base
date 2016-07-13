@@ -4,6 +4,7 @@ namespace Egf\Ancient;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Service class to extend.
@@ -40,6 +41,14 @@ abstract class Service {
      */
     protected function getDm() {
         return $this->get("doctrine")->getManager();
+    }
+
+    /**
+     * Get Request.
+     * @return Request
+     */
+    protected function getRq() {
+        return $this->get('request_stack')->getCurrentRequest();
     }
 
 }

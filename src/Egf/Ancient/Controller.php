@@ -13,14 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller as SfController;
 abstract class Controller extends SfController {
 
     /**
-     * Get Doctrine entity manager.
-     * @return EntityManager
-     */
-    protected function getDm() {
-        return $this->get("doctrine")->getManager();
-    }
-
-    /**
      * Check the entity and if it's new then persist it. If the second parameter is true (the default) then it runs the flush too.
      * @param $entity Mixed Entity to save.
      * @param bool $bFlush [Default: TRUE] If true, it flush the entity.
@@ -39,6 +31,14 @@ abstract class Controller extends SfController {
         }
 
         return $bWasCreated;
+    }
+
+    /**
+     * Get Doctrine entity manager.
+     * @return EntityManager
+     */
+    protected function getDm() {
+        return $this->get("doctrine")->getManager();
     }
 
 }

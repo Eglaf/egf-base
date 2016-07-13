@@ -180,6 +180,31 @@ class Func {
         return str_replace(str_split($sRemove), '', ucwords($sOriginal, $sRemove));
     }
 
+    /**
+     * Make a string url friendly.
+     * @param string $string
+     * @return mixed
+     */
+    public static function stringToUrl($string) {
+        return preg_replace('/^-+|-+$/', '', strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', static::removeAccentsFromString($string))));
+    }
+
+    /**
+     * Remove accents from a string.
+     * @param string $str
+     * @param string $charset
+     * @return mixed|string
+     */
+    public static function removeAccentsFromString($str, $charset = 'utf-8') {
+        $str = htmlentities($str, ENT_NOQUOTES, $charset);
+
+        $str = preg_replace('#&([A-za-z])(?:acute|cedil|caron|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
+        $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str);
+        $str = preg_replace('#&[^;]+;#', '', $str);
+        $str = preg_replace('[ű|Ű]', 'u', preg_replace('[ő|Ő]', 'o', $str));
+
+        return $str;
+    }
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -317,16 +342,18 @@ class Func {
      * @param \DateTime|string|integer|null $xDateTime A DateTime or string to convert to DateTime.
      * @return \DateTime|null DateTime or null if variable cannot be converted.
      */
-    public static function toDateTime($xDateTime = null)
-    {
+    public static function toDateTime($xDateTime = NULL) {
         if ($xDateTime instanceof \DateTime) {
             return $xDateTime;
-        } elseif (is_integer($xDateTime)) {
+        }
+        elseif (is_integer($xDateTime)) {
             return (new \DateTime())->setTimestamp($xDateTime);
-        } elseif (is_string($xDateTime)) {
+        }
+        elseif (is_string($xDateTime)) {
             if (static::isDateTimeStringValid($xDateTime)) { // Format accepted by default.
                 return new \DateTime($xDateTime);
-            } else { // Format isn't accepted by default.
+            }
+            else { // Format isn't accepted by default.
                 $bWithTime = (13 < strlen(trim($xDateTime)));
                 $asDateSeparators = ['.', '. ', '-', '/', ' '];
                 $asDateTimeSeparators = [' '];
@@ -345,7 +372,8 @@ class Func {
                                 }
                             }
                         }
-                    } else { // It has date value only.
+                    }
+                    else { // It has date value only.
                         foreach ([$sDateSep, ''] as $sDateEnd) {
                             $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd);
 
@@ -359,7 +387,7 @@ class Func {
             }
         }
 
-        return null;
+        return NULL;
     }
 
     /**
@@ -370,7 +398,7 @@ class Func {
     public static function isDateTimeStringValid($sDateString) {
         return (strlen($sDateString) >= 6 ? (bool)strtotime($sDateString) : FALSE);
     }
-    
+
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -512,7 +540,7 @@ class Func {
         return trim($sResult, "\\");
     }
 
-    
+
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
      * Private methods                                            **         **         **         **         **         **         **         **         **         **
