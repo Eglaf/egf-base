@@ -206,6 +206,7 @@ class Func {
         return $str;
     }
 
+
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
      * Array                                                      **         **         **         **         **         **         **         **         **         **
@@ -350,21 +351,17 @@ class Func {
             return (new \DateTime())->setTimestamp($xDateTime);
         }
         elseif (is_string($xDateTime)) {
-            if (static::isDateTimeStringValid($xDateTime)) { // Format accepted by default.
-                return new \DateTime($xDateTime);
-            }
-            else { // Format isn't accepted by default.
-                $bWithTime = (13 < strlen(trim($xDateTime)));
-                $asDateSeparators = ['.', '. ', '-', '/', ' '];
-                $asDateTimeSeparators = [' '];
-                $asTimeSeparators = [':'];
-                foreach ($asDateSeparators as $sDateSep) {
+            $bWithTime = (13 < strlen(trim($xDateTime)));
+            $asDateSeparators = ['.', '. ', '-', '/', ' '];
+            $asDateTimeSeparators = [' ', '\T'];
+            $asTimeSeparators = [':'];
+            foreach ($asDateSeparators as $sDateSep) {
+                foreach ([$sDateSep, ''] as $sDateEnd) {
                     if ($bWithTime) { // It has time values too.
                         foreach ($asDateTimeSeparators as $sDateTimeSep) {
                             foreach ($asTimeSeparators as $sTimeSep) {
                                 foreach ([($sTimeSep . 's'), ''] as $sSeconds) {
-                                    $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateSep . $sDateTimeSep . 'H' . $sTimeSep . 'i' . $sSeconds);
-
+                                    $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd . $sDateTimeSep . 'H' . $sTimeSep . 'i' . $sSeconds);
                                     $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
                                     if ($dt instanceof \DateTime) {
                                         return $dt;
@@ -374,13 +371,10 @@ class Func {
                         }
                     }
                     else { // It has date value only.
-                        foreach ([$sDateSep, ''] as $sDateEnd) {
-                            $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd);
-
-                            $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
-                            if ($dt instanceof \DateTime) {
-                                return $dt;
-                            }
+                        $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd);
+                        $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
+                        if ($dt instanceof \DateTime) {
+                            return $dt;
                         }
                     }
                 }
