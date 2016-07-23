@@ -14,23 +14,19 @@ use Egf\ExportBundle\Model\ExportCol;
 /**
  * Export csv service
  */
-class ExportCsvService extends Ancient\Service
-{
+class ExportCsvService extends Ancient\Service {
 
-    /**
-     * @var array $aData The data what will be exported. It can be array of arrays or array of entities.
-     */
+    /** @var array $aData The data what will be exported. It can be array of arrays or array of entities. */
     private $aData = [];
 
-    /**
-     * @var array $aoColumns The columns of the exported csv file.
-     */
+    /** @var array $aoColumns The columns of the exported csv file. */
     private $aoColumns = [];
 
-    /**
-     * @var string $sFileName The name of file.
-     */
+    /** @var string $sFileName The name of file. */
     private $sFileName = "dataexport";
+
+    /** @var bool Set the exported content encode to Asci. This way the sheety MsExcel can show accent characters correctly. */
+    private $bToAnsi = FALSE;
 
 
     /**************************************************************************************************************************************************************
@@ -45,8 +41,7 @@ class ExportCsvService extends Ancient\Service
      * @return $this
      * @todo accept ArrayCollection
      */
-    public function setData(array $aData)
-    {
+    public function setData(array $aData) {
         $this->aData = $aData;
 
         return $this;
@@ -57,8 +52,7 @@ class ExportCsvService extends Ancient\Service
      * @param $xRow
      * @return $this
      */
-    public function addData($xRow)
-    {
+    public function addData($xRow) {
         $this->aData[] = $xRow;
 
         return $this;
@@ -69,8 +63,7 @@ class ExportCsvService extends Ancient\Service
      * @param $sFileName
      * @return $this
      */
-    public function setFileName($sFileName)
-    {
+    public function setFileName($sFileName) {
         $this->sFileName = $sFileName;
 
         return $this;
@@ -83,8 +76,7 @@ class ExportCsvService extends Ancient\Service
      * @param string            $sColumnHeader A custom header if the property isn"t good enough.
      * @return $this
      */
-    public function addColumn($sKey, ExportCol\BaseCol $oColumn = null, $sColumnHeader = null)
-    {
+    public function addColumn($sKey, ExportCol\BaseCol $oColumn = NULL, $sColumnHeader = NULL) {
         if ( !$oColumn) {
             $oColumn = new ExportCol\Text();
         }
@@ -97,6 +89,15 @@ class ExportCsvService extends Ancient\Service
         return $this;
     }
 
+    /**
+     * Set the exported content to ansi encode. This way the sheety MsExcel can show some accent characters correctly. Of course ő and ű is still sucks.
+     * @return $this
+     */
+    public function toAnsi() {
+        $this->bToAnsi = TRUE;
+
+        return $this;
+    }
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -107,24 +108,51 @@ class ExportCsvService extends Ancient\Service
     /**
      * @return Response The downloadable csv file.
      */
-    public function getResponse()
-    {
-        $oResponse = $this->get("templating")->renderResponse("EgfExportBundle:Export:data.csv.twig", [
-            "aHeaders" => $this->getHeaders(),
-            "aaData"   => $this->getTransformedData(),
-        ]);
-        $oResponse->headers->set("Content-Type", "text/csv");
+    public function getResponse() {
+        $oResponse = new Response();
+        $oResponse->setContent($this->getContent());
+        if ($this->bToAnsi) {
+            $oResponse->headers->set("Content-Type", "text/csv; charset=WINDOWS-1252");
+        }
+        else {
+            $oResponse->headers->set("Content-Type", "text/csv; charset=UTF-8");
+        }
+
         $oResponse->headers->set("Content-Disposition", "attachment; filename='" . $this->sFileName . ".csv'");
 
         return $oResponse;
     }
 
     /**
+     * It gives back the string content of csv.
+     * @return string Csv content.
+     */
+    public function getContent() {
+        $sContent = $this->get("templating")->render("LnExportBundle:Export:data.csv.twig", [
+            "aHeaders" => $this->getHeaders(),
+            "aaData" => $this->getTransformedData(),
+        ]);
+
+        if ($this->bToAnsi) {
+            $sContent = htmlentities($sContent, ENT_QUOTES, 'utf-8');
+            $sContent = html_entity_decode($sContent, ENT_QUOTES, 'Windows-1252');
+        }
+
+        return $sContent;
+    }
+
+
+    /**************************************************************************************************************************************************************
+     *                                                          **         **         **         **         **         **         **         **         **         **
+     * Protected                                                  **         **         **         **         **         **         **         **         **         **
+     *                                                          **         **         **         **         **         **         **         **         **         **
+     *************************************************************************************************************************************************************/
+
+    /**
      * It gives back the headers in an array. These will be the first row.
      * @return array Header strings.
      */
-    private function getHeaders()
-    {
+    protected function getHeaders() {
         $aResult = [];
         /** @var ExportCol\BaseCol $oColumn */
         foreach ($this->aoColumns as $oColumn) {
@@ -138,8 +166,7 @@ class ExportCsvService extends Ancient\Service
      * Get the multidimensional array with the exportable data.
      * @return array Exportable data.
      */
-    private function getTransformedData()
-    {
+    protected function getTransformedData() {
         $aaResult = [];
 
         /** @var object|array $xRow */
@@ -151,14 +178,17 @@ class ExportCsvService extends Ancient\Service
                 if (Ancient\Func::isEntity($xRow)) {
                     if (Ancient\Func::hasEntityGetField($xRow, $oColumn->getKey())) {
                         $oColumn->setData(Ancient\Func::entityGetField($xRow, $oColumn->getkey()));
-                    } else {
+                    }
+                    else {
                         throw new \Exception("Entity doesn't have get method! \n Entity: " . get_class($xRow) . "\n Method: get" . ucfirst($oColumn->getKey()) . " \n\n ");
                     }
-                } else if (is_array($xRow)) {
+                }
+                else if (is_array($xRow)) {
                     if (array_key_exists($oColumn->getHeader(), $xRow)) {
                         $oColumn->setData($xRow[$oColumn->getHeader()]);
                     }
-                } else {
+                }
+                else {
                     throw new \Exception("DataRow to export has to be entity or array!");
                 }
                 $aRow[] = $oColumn->getData();

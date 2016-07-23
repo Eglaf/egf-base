@@ -197,11 +197,13 @@ class Func {
      */
     public static function removeAccentsFromString($str, $charset = 'utf-8') {
         $str = htmlentities($str, ENT_NOQUOTES, $charset);
-
         $str = preg_replace('#&([A-za-z])(?:acute|cedil|caron|circ|grave|orn|ring|slash|th|tilde|uml);#', '\1', $str);
         $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str);
         $str = preg_replace('#&[^;]+;#', '', $str);
-        $str = preg_replace('[ű|Ű]', 'u', preg_replace('[ő|Ő]', 'o', $str));
+        $str = preg_replace('[ő]', 'o', $str);
+        $str = preg_replace('[ű]', 'u', $str);
+        $str = preg_replace('[Ő]', 'O', $str);
+        $str = preg_replace('[Ű]', 'U', $str);
 
         return $str;
     }
@@ -341,9 +343,12 @@ class Func {
     /**
      * Gives back the given DateTime or convert the string to DateTime and gives back that. It accepts much more date formats. Integer is used as timestamp.
      * @param \DateTime|string|integer|null $xDateTime A DateTime or string to convert to DateTime.
+     * @param string $d1 [Default: Y] The first thing in the date. In some fracked up countries it's not the year.
+     * @param string $d2 [Default: m] The second thing in the date. In some fracked up countries it's not the month.
+     * @param string $d3 [Default: d] The third thing in the date. In some fracked up countries it's not the day.
      * @return \DateTime|null DateTime or null if variable cannot be converted.
      */
-    public static function toDateTime($xDateTime = NULL) {
+    public static function toDateTime($xDateTime = NULL, $d1 = 'Y', $d2 = 'm', $d3 = 'd') {
         if ($xDateTime instanceof \DateTime) {
             return $xDateTime;
         }
@@ -361,7 +366,7 @@ class Func {
                         foreach ($asDateTimeSeparators as $sDateTimeSep) {
                             foreach ($asTimeSeparators as $sTimeSep) {
                                 foreach ([($sTimeSep . 's'), ''] as $sSeconds) {
-                                    $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd . $sDateTimeSep . 'H' . $sTimeSep . 'i' . $sSeconds);
+                                    $sFormat = ($d1 . $sDateSep . $d2 . $sDateSep . $d3 . $sDateEnd . $sDateTimeSep . 'H' . $sTimeSep . 'i' . $sSeconds);
                                     $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
                                     if ($dt instanceof \DateTime) {
                                         return $dt;
@@ -371,7 +376,7 @@ class Func {
                         }
                     }
                     else { // It has date value only.
-                        $sFormat = ('Y' . $sDateSep . 'm' . $sDateSep . 'd' . $sDateEnd);
+                        $sFormat = ($d1 . $sDateSep . $d2 . $sDateSep . $d3 . $sDateEnd);
                         $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
                         if ($dt instanceof \DateTime) {
                             return $dt;
