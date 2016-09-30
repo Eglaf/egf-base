@@ -4,8 +4,7 @@ namespace Egf\Base;
 
 /**
  * Static class with some common functions.
- * @author attila kovacs
- * @since  2015.10.09.
+ * use Egf\Base\Func as BaseFunc;
  */
 class Func {
 

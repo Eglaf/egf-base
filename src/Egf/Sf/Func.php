@@ -5,9 +5,8 @@ namespace Egf\Sf;
 use Egf\Base\Func as BaseFunc;
 
 /**
- * Static class with some common functions for Symfony2 projects.
- * @author attila kovacs
- * @since  2015.09.30.
+ * Static class with some common functions for Symfony 2 projects.
+ * use Egf\Sf\Func as SfFunc;
  */
 class Func {
 
