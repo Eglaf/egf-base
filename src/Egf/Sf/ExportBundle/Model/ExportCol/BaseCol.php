@@ -1,10 +1,10 @@
 <?php
 
-namespace Egf\ExportBundle\Model\ExportCol;
+namespace Egf\Sf\ExportBundle\Model\ExportCol;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Doctrine\ORM\EntityManager;
-use Egf\Ancient;
+use Egf\Sf\Ancient;
 
 /**
  * Created by PhpStorm.

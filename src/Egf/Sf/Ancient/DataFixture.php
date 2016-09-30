@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\Ancient;
+namespace Egf\Sf\Ancient;
 
 use  Doctrine\Common\DataFixtures\AbstractFixture,
      Doctrine\Common\DataFixtures\OrderedFixtureInterface,

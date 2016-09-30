@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\ExportBundle\Model\ExportCol;
+namespace Egf\Sf\ExportBundle\Model\ExportCol;
 
 /**
  * Class Date

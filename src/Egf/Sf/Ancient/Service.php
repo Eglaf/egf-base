@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\Ancient;
+namespace Egf\SF\Ancient;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;

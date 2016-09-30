@@ -8,11 +8,14 @@ use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\HttpFoundation\File\UploadedFile;
-use Egf\Ancient;
-use Egf\ExportBundle\Model\ExportCol;
+use Egf\Base\Func as BaseFunc;
+use Egf\Sf\Func as SfFunc,
+    Egf\Sf\Ancient;
+use Egf\Sf\ExportBundle\Model\ExportCol;
 
 /**
- * Export csv service
+ * Export to csv.
+ * ServiceName: export.csv
  */
 class ExportCsvService extends Ancient\Service {
 
@@ -175,9 +178,9 @@ class ExportCsvService extends Ancient\Service {
 
             /** @var ExportCol\BaseCol $oColumn */
             foreach ($this->aoColumns as $oColumn) {
-                if (Ancient\Func::isEntity($xRow)) {
-                    if (Ancient\Func::hasEntityGetField($xRow, $oColumn->getKey())) {
-                        $oColumn->setData(Ancient\Func::entityGetField($xRow, $oColumn->getkey()));
+                if (SfFunc::isEntity($xRow)) {
+                    if (BaseFunc::hasObjectGetMethod($xRow, $oColumn->getKey())) {
+                        $oColumn->setData(BaseFunc::callObjectGetMethod($xRow, $oColumn->getkey()));
                     }
                     else {
                         throw new \Exception("Entity doesn't have get method! \n Entity: " . get_class($xRow) . "\n Method: get" . ucfirst($oColumn->getKey()) . " \n\n ");

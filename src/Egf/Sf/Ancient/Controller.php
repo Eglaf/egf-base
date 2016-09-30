@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\Ancient;
+namespace Egf\Sf\Ancient;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller as SfController;
 use Symfony\Component\HttpFoundation\Request;

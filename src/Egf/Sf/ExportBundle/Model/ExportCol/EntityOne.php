@@ -1,12 +1,14 @@
 <?php
 
-namespace Egf\ExportBundle\Model\ExportCol;
+namespace Egf\Sf\ExportBundle\Model\ExportCol;
 
-use Egf\Ancient;
+use Egf\Base\Func as BaseFunc;
+use Egf\Sf\Func as SfFunc;
 
 /**
  * Class EntityOne
  * In case of more properties are needed from one related entity, then rewrite the columnHeader with the third parameter of addColumn method, and use the related entity name at every column as first parameter.
+ * @todo Add another column, to affect the cell content (date for example)...
  */
 class EntityOne extends BaseCol {
 
@@ -37,12 +39,12 @@ class EntityOne extends BaseCol {
     protected function getNext($xData, $aPath) {
         $xNext = array_shift($aPath);
         if ($xNext) {
-            if (is_object($xNext) && Ancient\Func::isEntity($xNext)) {
+            if (is_object($xNext) && SfFunc::isEntity($xNext)) {
                 return $this->getNext($xNext, $aPath);
             }
             else {
-                if (Ancient\Func::hasEntityGetField($xData, $xNext)) {
-                    return Ancient\Func::entityGetField($xData, $xNext);
+                if (BaseFunc::hasObjectGetMethod($xData, $xNext)) {
+                    return BaseFunc::callObjectGetMethod($xData, $xNext);
                 }
             }
         }

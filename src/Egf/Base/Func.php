@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\Ancient;
+namespace Egf\Base;
 
 /**
  * Static class with some common functions.
@@ -163,7 +163,7 @@ class Func {
     /**
      * Transform string into camelCase format.
      * @param string $sOriginal The string to transform.
-     * @param string $sRemove   The characters those should be removed and count as space. Default is dash and underline.
+     * @param string $sRemove   The characters those should be removed and count as space. Default is space, dash, and underline.
      * @return string The camelCased string.
      */
     public static function toCamelCase($sOriginal, $sRemove = ' -_') {
@@ -173,7 +173,7 @@ class Func {
     /**
      * Transform string into StudlyCaps format.
      * @param string $sOriginal The string to transform.
-     * @param string $sRemove   The characters those should be removed and count as space. Default is dash and underline.
+     * @param string $sRemove   The characters those should be removed and count as space. Default is space, dash, and underline.
      * @return mixed The StudyCapped string.
      */
     public static function toStudlyCaps($sOriginal, $sRemove = ' -_') {
@@ -208,6 +208,30 @@ class Func {
         return $str;
     }
 
+    /**
+     * Truncate string to a length without cutting words into half.
+     * @param string  $sString    String to truncate.
+     * @param integer $iMaxLength Expected length of string.
+     * @param string  $sPostFix   Append to the end of truncated string.
+     * @return string Truncated string.
+     */
+    public static function truncateToLength($sString, $iMaxLength, $sPostFix = '...') {
+        $aParts = preg_split('/([\s\n\r]+)/u', $sString, NULL, PREG_SPLIT_DELIM_CAPTURE);
+
+        $iLength = 0;
+        $iLastPart = 0; // todo into for...
+        $sFinalPostFix = '';
+        for (; $iLastPart < count($aParts); ++$iLastPart) {
+            $iLength += strlen($aParts[$iLastPart]);
+            if ($iLength > $iMaxLength) {
+                $sFinalPostFix = $sPostFix;
+
+                break;
+            }
+        }
+
+        return implode(array_slice($aParts, 0, $iLastPart)) . $sFinalPostFix;
+    }
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -343,9 +367,9 @@ class Func {
     /**
      * Gives back the given DateTime or convert the string to DateTime and gives back that. It accepts much more date formats. Integer is used as timestamp.
      * @param \DateTime|string|integer|null $xDateTime A DateTime or string to convert to DateTime.
-     * @param string $d1 [Default: Y] The first thing in the date. In some fracked up countries it's not the year.
-     * @param string $d2 [Default: m] The second thing in the date. In some fracked up countries it's not the month.
-     * @param string $d3 [Default: d] The third thing in the date. In some fracked up countries it's not the day.
+     * @param string                        $d1        [Default: Y] The first thing in the date. In some fhucked up countries it's not the year.
+     * @param string                        $d2        [Default: m] The second thing in the date. In some fhucked up countries it's not the month.
+     * @param string                        $d3        [Default: d] The third thing in the date. In some fhucked up countries it's not the day.
      * @return \DateTime|null DateTime or null if variable cannot be converted.
      */
     public static function toDateTime($xDateTime = NULL, $d1 = 'Y', $d2 = 'm', $d3 = 'd') {
@@ -362,7 +386,8 @@ class Func {
             $asTimeSeparators = [':'];
             foreach ($asDateSeparators as $sDateSep) {
                 foreach ([$sDateSep, ''] as $sDateEnd) {
-                    if ($bWithTime) { // It has time values too.
+                    // It has time values too.
+                    if ($bWithTime) {
                         foreach ($asDateTimeSeparators as $sDateTimeSep) {
                             foreach ($asTimeSeparators as $sTimeSep) {
                                 foreach ([($sTimeSep . 's'), ''] as $sSeconds) {
@@ -375,7 +400,8 @@ class Func {
                             }
                         }
                     }
-                    else { // It has date value only.
+                    // It has date value only.
+                    else {
                         $sFormat = ($d1 . $sDateSep . $d2 . $sDateSep . $d3 . $sDateEnd);
                         $dt = \DateTime::createFromFormat(trim($sFormat), trim($xDateTime));
                         if ($dt instanceof \DateTime) {
@@ -406,21 +432,13 @@ class Func {
      *************************************************************************************************************************************************************/
 
     /**
-     * Transform entities into JSON.
-     * $this->getSerializer()->normalize($enObject, 'json');
-     * $this->getSerializer()->normalize($aenObjects, 'json');
-     * @return \Symfony\Component\Serializer\Serializer
-     * @url http://symfony.com/doc/current/components/serializer.html
+     * Check if a method exists.
+     * @param object $oObject
+     * @param string $sMethod
+     * @return boolean
      */
-    public static function getSerializer() {
-        $oClassMetadataFactory = new \Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactory(new \Symfony\Component\Serializer\Mapping\Loader\AnnotationLoader(new \Doctrine\Common\Annotations\AnnotationReader()));
-        $oNormalizer = (new \Symfony\Component\Serializer\Normalizer\ObjectNormalizer($oClassMetadataFactory))
-            ->setCircularReferenceLimit(0)
-            ->setCircularReferenceHandler(function ($enObject) {
-                return (method_exists($enObject, "getId") ? $enObject->getId() : "object-without-id");
-            });
-
-        return new \Symfony\Component\Serializer\Serializer([$oNormalizer], [new \Symfony\Component\Serializer\Encoder\JsonEncoder()]);
+    public static function hasObjectMethod($oObject, $sMethod) {
+        return method_exists($oObject, $sMethod);
     }
 
     /**
@@ -431,7 +449,7 @@ class Func {
      * @return mixed Result of the method.
      */
     public static function callObjectMethod($oObject, $sMethod, $aParameters = array()) {
-        if (method_exists($oObject, $sMethod)) {
+        if (static::hasObjectMethod($oObject, $sMethod)) {
             return call_user_func_array(array($oObject, $sMethod), (is_array($aParameters) ? $aParameters : array($aParameters)));
         }
         else {
@@ -441,12 +459,12 @@ class Func {
 
     /**
      * Decide if the entity has a get method for the property.
-     * @param object $enObject  The entity object to check.
-     * @param string $sProperty The property that should exist.
+     * @param object $oObject   The entity object to check.
+     * @param string $sProperty The property that should have a setter method.
      * @return bool True if the entity has get field for property.
      */
-    public static function hasObjectSetMethod($enObject, $sProperty) {
-        return method_exists($enObject, "set" . ucfirst($sProperty));
+    public static function hasObjectSetMethod($oObject, $sProperty) {
+        return static::hasObjectMethod($oObject, ("set" . ucfirst($sProperty)));
     }
 
     /**
@@ -457,19 +475,17 @@ class Func {
      * @return  mixed                              Result of set method.
      */
     public static function callObjectSetMethod($entity, $method, $parameters = NULL) {
-        $entitySetMethod = "set" . ucfirst($method);
-
-        return static::callObjectMethod($entity, $entitySetMethod, $parameters);
+        return static::callObjectMethod($entity, ("set" . ucfirst($method)), $parameters);
     }
 
     /**
      * Decide if the entity has a get method for the property.
-     * @param object $enObject  The entity object to check.
-     * @param string $sProperty The property that should exist.
+     * @param object $oObject   The entity object to check.
+     * @param string $sProperty The property that should have a getter method.
      * @return bool True if the entity has get field for property.
      */
-    public static function hasObjectGetMethod($enObject, $sProperty) {
-        return method_exists($enObject, "get" . ucfirst($sProperty));
+    public static function hasObjectGetMethod($oObject, $sProperty) {
+        return static::hasObjectMethod($oObject, "get" . ucfirst($sProperty));
     }
 
     /**
@@ -497,46 +513,6 @@ class Func {
         else {
             throw new \Exception("Object doesn't have getter! \n Class: " . get_class($oEntity) . " \n Method: get" . ucfirst($sMethod) . " \n\n ");
         }
-    }
-
-    /**
-     * Check if the given variable is a valid entity object.
-     * @param mixed $object The variable to check.
-     * @return bool True if it's an entity.
-     */
-    public static function isEntity($object) {
-        return (is_object($object) && method_exists($object, "getId") && static::isNaturalNumber($object->getId()));
-    }
-
-    /**
-     * Check if the entity is in the ArrayCollection.
-     * @param object                             $enEntity          Searched entity.
-     * @param \Doctrine\ORM\PersistentCollection $acArrayCollection Search in ArrayCollection
-     * @return bool True if entity is in ArrayCollection.
-     */
-    public static function inArrayCollection($enEntity, \Doctrine\ORM\PersistentCollection $acArrayCollection) {
-        return in_array($enEntity, $acArrayCollection->toArray(), TRUE);
-    }
-
-    /**
-     * It gives back the entity alias name.
-     * @param string $sClass Path to the entity. For example: \Egf\SomeBundle\Entity\Stuff\Things
-     * @return string The entity alias. For example: EgfSomeBundle:Stuff\Things
-     */
-    public static function getEntityAlias($sClass) {
-        $sResult = "";
-        foreach (explode("\\", $sClass) as $sFragment) {
-            // Path to the Entity directory within the Bundle.
-            if (strpos($sResult, ":") === FALSE) {
-                $sResult .= ($sFragment === "Entity" ? ":" : $sFragment);
-            }
-            // Subdirectory in Entity or the class name itself.
-            else {
-                $sResult .= $sFragment . "\\";
-            }
-        }
-
-        return trim($sResult, "\\");
     }
 
 

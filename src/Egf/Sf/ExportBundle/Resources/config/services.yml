@@ -1,4 +1,4 @@
 services:
   export.csv:
-    class: Egf\ExportBundle\Service\ExportCsvService
+    class: Egf\Sf\ExportBundle\Service\ExportCsvService
     arguments: ["@service_container"]

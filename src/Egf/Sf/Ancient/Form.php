@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\Ancient;
+namespace Egf\Sf\Ancient;
 
 use Symfony\Component\Form\AbstractType,
     Symfony\Component\Form\FormBuilderInterface,
