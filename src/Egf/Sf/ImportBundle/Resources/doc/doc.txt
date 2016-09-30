@@ -1,0 +1,40 @@
+Import csv service:
+
+    $this->get("import.csv")
+        ->setFileInputName("clients_csv")                                                           // The name of file input.
+        ->setEntityClass("Ln\\AvBundle\\Entity\\Client")                                            // The imported entity class
+        ->setCustomFileName("some_file_name")                                                       // Custom file name. (Optional)
+        ->addColumn("firstName", new ImportCol\Text())                                              // Import cell into property.
+        ->addColumn("lastName", new ImportCol\Text(), "last_name")                                  // Import cell into property. The header is rewritten.
+        ->addColumn("primaryEmail", (new ImportCol\Text())
+            ->hasToBeUnique())                                                                      // It has to be unique
+        ->addColumn("primaryPhone", new ImportCol\Text())
+        ->addColumn("gender", (new ImportCol\Entity())                                              // Related entity
+            ->setRelatedOptions($this->getDm()->getRepository("LnAvBundle:Gender")->findAll())      // The options for related entity
+            ->setRelatedField("text")                                                               // The field that'll be compared to the cell
+            ->enableCreate("Ln\\AvBundle\\Entity\\Gender", ["prop" => "value"))                     // Enable creating new related entities... with some other property
+        ->addColumn("dateOfBirth", new ImportCol\Date())                                            // Date (+12h)
+        ->enableUpdate()                                                                            // In case of duplicate, it'll update the older one instead of crying
+        ->copyFileTo("uploads/imports/clients")                                                     // Do the copy to the set path
+        ->setDefaultEntityProperties([                                                              // Some default property for the entity.
+            "city" => "The Big City",
+            "street" => "Some Street",
+            "isInvoiceAddressTheSame" => true,
+        ])
+        ->disableExportTroubledRows()                                                               // If it's not called, then it'll generate a csv from trobuled rows.
+        ->importContent();                                                                          // Do the import
+
+    if ($this->get("import.csv")->isError()) {                                                      // Check if there was any error
+        var_dump($this->get("import.csv")->getErrors());                                            // Get back the errors
+    }
+
+    if ($this->get("import.csv")->countRowsMarkedAsTroubled()) {                                           // Only if $this->get("import.csv")->disableExportTroubledRows() wasn't called and there was at least one row with trouble.
+        return $this->get("import.csv")->getTroubledExportResponse();                               // Get the response of exported troubled rows in a csv file.
+    }
+
+    if ($this->get("import.csv")->countRowsMarkedAsTroubled()) {
+        $sFileNameOfTroubledRows = $this->sUploadDirectory . 'exportedTroubles/' . ((new \DateTime())->format('Ymd_His') . '_' . $this->get("import.csv")->countRowsMarkedAsTroubled()) . '.csv';
+
+        $this->get("import.csv")
+            ->saveTroubledExportIntoFile($sFileNameOfTroubledRows);
+    }

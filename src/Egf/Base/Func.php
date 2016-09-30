@@ -518,7 +518,7 @@ class Func {
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
-     * Private methods                                            **         **         **         **         **         **         **         **         **         **
+     * Used methods                                               **         **         **         **         **         **         **         **         **         **
      *                                                          **         **         **         **         **         **         **         **         **         **
      *************************************************************************************************************************************************************/
 
@@ -529,7 +529,7 @@ class Func {
      * @param array  $aFragments The chain of properties listed in an array.
      * @return string The result of property chain.
      */
-    private static function getPropertyRecursively($enObject, array $aFragments) {
+    protected static function getPropertyRecursively($enObject, array $aFragments) {
         // First item in chain.
         $sProperty = array_shift($aFragments);
         // Check if the object has the getter.

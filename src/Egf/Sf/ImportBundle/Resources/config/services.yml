@@ -1,0 +1,4 @@
+services:
+  import.csv:
+    class: Egf\Sf\ImportBundle\Service\ImportCsvService
+    arguments: ["@service_container"]

@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\SF\ExportBundle;
+namespace Egf\Sf\ExportBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

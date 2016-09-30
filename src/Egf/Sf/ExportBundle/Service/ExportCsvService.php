@@ -1,6 +1,6 @@
 <?php
 
-namespace Egf\ExportBundle\Service;
+namespace Egf\Sf\ExportBundle\Service;
 
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
@@ -28,7 +28,7 @@ class ExportCsvService extends Ancient\Service {
     /** @var string $sFileName The name of file. */
     private $sFileName = "dataexport";
 
-    /** @var bool Set the exported content encode to Asci. This way the sheety MsExcel can show accent characters correctly. */
+    /** @var bool Set the exported content encode to Ansi. This way MsExcel can show accent characters correctly. */
     private $bToAnsi = FALSE;
 
 
