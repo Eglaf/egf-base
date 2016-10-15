@@ -239,7 +239,7 @@ class Func {
      *************************************************************************************************************************************************************/
 
     /**
-     * Check for in_array but don't throw an error if it's not an array.
+     * Check for in_array but does not throw an error if it's not an array.
      * @param array $aHaystack  The array that can have the searched element.
      * @param mixed $xNeedle    The searched element of haystack array.
      * @param bool  $bTypeCheck Decide to do type check. Default: FALSE.
@@ -420,7 +420,7 @@ class Func {
      * @return bool True if the string is valid.
      */
     public static function isDateTimeStringValid($sDateString) {
-        return (strlen($sDateString) >= 6 ? (bool)strtotime($sDateString) : FALSE);
+        return boolval(strtotime($sDateString));
     }
 
 
