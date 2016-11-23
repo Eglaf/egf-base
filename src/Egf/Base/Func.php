@@ -31,17 +31,17 @@ class Func {
 
     /**
      * Generate a random Float number.
-     * @param float|integer $min      The minimum value.
-     * @param float|integer $max      The maximum value.
-     * @param int           $decimals The length of result.
+     * @param float|integer $fMin      The minimum value.
+     * @param float|integer $fMax      The maximum value.
+     * @param int           $iDecimals The length of result.
      * @return float Random float number.
      */
-    public static function getRandomFloat($min = 0.0, $max = 1.0, $decimals = 2) {
-        $scale = pow(10, $decimals);
+    public static function getRandomFloat($fMin = 0.0, $fMax = 1.0, $iDecimals = 2) {
+        $iScale = pow(10, $iDecimals);
 
-        return mt_rand($min * $scale, $max * $scale) / $scale;
+        return mt_rand($fMin * $iScale, $fMax * $iScale) / $iScale;
     }
-
+    
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -231,6 +231,7 @@ class Func {
 
         return implode(array_slice($aParts, 0, $iLastPart)) . $sFinalPostFix;
     }
+
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
