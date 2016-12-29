@@ -41,7 +41,7 @@ class Func {
 
         return mt_rand($fMin * $iScale, $fMax * $iScale) / $iScale;
     }
-    
+
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -279,6 +279,65 @@ class Func {
         }
 
         return FALSE;
+    }
+
+    /**
+     * It looks for a row in a 2d array. Search by any key.
+     * @param array   $aaRows     Array of arrays.
+     * @param string  $sKey       The key of array.
+     * @param mixed   $xVal       Searched value.
+     * @param boolean $bTypeCheck Decide if the type should be checked.
+     * @return array|null The first accepted row of array, null otherwise.
+     */
+    public static function oneFromArrayByKey(array $aaRows, $sKey, $xVal, $bTypeCheck = FALSE) {
+        foreach ($aaRows as $aRow) {
+            if (array_key_exists($sKey, $aRow)) {
+                if (($bTypeCheck && $aRow[$sKey] === $xVal) || ( !$bTypeCheck && $aRow[$sKey] == $xVal)) {
+                    return $aRow;
+                }
+            }
+            else {
+                throw new \Exception('The key "' . $sKey . '" does not exist in the row!');
+            }
+        }
+
+        return NULL;
+    }
+
+    /**
+     * It looks for a row in a 2d array. Search by id.
+     * @param array          $aaRows     Array of arrays.
+     * @param integer|string $iId        The number that should be behind the id assoc key.
+     * @param boolean        $bTypeCheck Decide if the type should be checked.
+     * @return array|null The first accepted row of array, null otherwise.
+     */
+    public static function oneFromArrayById(array $aaRows, $iId, $bTypeCheck = FALSE) {
+        return static::oneFromArrayByKey($aaRows, 'id', $iId, $bTypeCheck);
+    }
+
+    /**
+     * It looks for some rows in a 2d array. Search by key.
+     * @param array   $aaRows     Array of arrays.
+     * @param string  $sKey       The key of array.
+     * @param mixed   $xVal       Searched value.
+     * @param boolean $bTypeCheck Decide if the type should be checked.
+     * @return array The array of accepted rows from input array.
+     */
+    public static function fromArrayByKey(array $aaRows, $sKey, $xVal, $bTypeCheck = FALSE) {
+        $aResult = [];
+
+        foreach ($aaRows as $aRow) {
+            if (array_key_exists($sKey, $aRow)) {
+                if (($bTypeCheck && $aRow[$sKey] === $xVal) || ( !$bTypeCheck && $aRow[$sKey] == $xVal)) {
+                    $aResult[] = $aRow;
+                }
+            }
+            else {
+                throw new \Exception('The key "' . $sKey . '" does not exist in the row!');
+            }
+        }
+
+        return $aResult;
     }
 
     /**

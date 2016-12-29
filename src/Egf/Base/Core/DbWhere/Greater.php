@@ -3,19 +3,20 @@
 namespace Egf\Base\Core\DbWhere;
 
 /**
- * Class Equal
+ * Class Greater
  */
-class Equal extends Base {
-
+class Greater extends Base {
+	
 	/** @var string Type. */
 	protected $sType = 's';
-
+	
 	/**
-	 * A basic condition equation string. It uses NULL-safe equal operator.
+	 * A basic condition greater string.
 	 * @return string
 	 */
 	public function getConditionEquation() {
-		return ' <=> ';
+		return ' > ';
 	}
-
+	
+	
 }
