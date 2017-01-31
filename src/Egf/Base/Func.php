@@ -232,6 +232,20 @@ class Func {
         return implode(array_slice($aParts, 0, $iLastPart)) . $sFinalPostFix;
     }
 
+    /**
+     * Add an extension postfix to string if it does not have it.
+     * @param string $sFile Path to file.
+     * @param string $sExt  Expected extension.
+     * @return string Path to file with an extension.
+     */
+    public static function addFileExtensionIfNeeded($sFile, $sExt) {
+        // Add dot to extension if it is not there.
+        $sExt = (substr($sExt, 0, 1) !== '.' ? ('.' . $sExt) : $sExt);
+
+        // Add extension if it is not there.
+        return $sFile . (substr($sFile, - (strlen($sExt))) !== $sExt ? $sExt : '');
+    }
+
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
