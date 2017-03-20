@@ -4,9 +4,9 @@ namespace Egf\Base;
 
 /**
  * Static class with some common functions.
- * use Egf\Base\Func as BaseFunc;
+ * use Egf\Base\Util as BaseUtil;
  */
-class Func {
+class Util {
 
     /**************************************************************************************************************************************************************
      *                                                          **         **         **         **         **         **         **         **         **         **
@@ -37,9 +37,18 @@ class Func {
      * @return float Random float number.
      */
     public static function getRandomFloat($fMin = 0.0, $fMax = 1.0, $iDecimals = 2) {
-        $iScale = pow(10, $iDecimals);
+        $fScale = pow(10, $iDecimals);
 
-        return mt_rand($fMin * $iScale, $fMax * $iScale) / $iScale;
+        return mt_rand($fMin * $fScale, $fMax * $fScale) / $fScale;
+    }
+
+    /**
+     * It gives back true with a percentage.
+     * @param integer $iPercent The percent to be true.
+     * @return bool Sometimes true.
+     */
+    public static function percentChance($iPercent) {
+        return (mt_rand(0, 100) <= $iPercent);
     }
 
 
@@ -53,7 +62,7 @@ class Func {
      * Generate a random string.
      * @param   int    $iLength Length of string. Default: 8.
      * @param   string $sType   Type of character pool. Default: alnum. Options: alnum, alpha, hexdec, numeric, nozero, distinct.
-     * @return  string Random string.
+     * @return string Random string.
      */
     public static function getRandomString($iLength = 8, $sType = 'alnum') {
         if ($sType == 'alnum') {
@@ -243,7 +252,25 @@ class Func {
         $sExt = (substr($sExt, 0, 1) !== '.' ? ('.' . $sExt) : $sExt);
 
         // Add extension if it is not there.
-        return $sFile . (substr($sFile, - (strlen($sExt))) !== $sExt ? $sExt : '');
+        return $sFile . (substr($sFile, -(strlen($sExt))) !== $sExt ? $sExt : '');
+    }
+
+    /**
+     * Trim slashes (and backslash) from a string.
+     * @param string $sVar
+     * @return string
+     */
+    public static function trimSlash($sVar) {
+        return trim($sVar, '/\\');
+    }
+
+    /**
+     * Check if the given string is a valid ip address.
+     * @param string $sIp Variable to check. If null, ask server for remote ip address.
+     * @return bool True if valid ip address.
+     */
+    public static function isValidIpAddress($sIp = NULL) {
+        return (filter_var(($sIp ? $sIp : $_SERVER['REMOTE_ADDR']) , FILTER_VALIDATE_IP) !== FALSE);
     }
 
 
@@ -293,6 +320,60 @@ class Func {
         }
 
         return FALSE;
+    }
+
+    /**
+     * Sort a multi dimensional array by an index.
+     * @param array   $array         Array what need a sort.
+     * @param string  $index         Sort by index.
+     * @param string  $order         Direction of sorting. Default: ASC. Options: ASC, DESC.
+     * @param boolean $natSort       Is natural sorting. Default: FALSE.
+     * @param boolean $caseSensitive Is case sensitive. Default: FALSE.
+     * @return array Sorted array.
+     */
+    public static function sortArrayMulti($array, $index, $order = 'ASC', $natSort = FALSE, $caseSensitive = FALSE) {
+        $order = strtoupper($order);
+        $sorted = array();
+
+        if (is_array($array) && count($array) > 0) {
+            foreach (array_keys($array) as $key) {
+                $temp[$key] = $array[$key][$index];
+            }
+
+            if ( !$natSort) {
+                if (strtoupper($order) == 'ASC') {
+                    asort($temp);
+                }
+                else {
+                    arsort($temp);
+                }
+            }
+            else {
+                if ($caseSensitive === TRUE) {
+                    natsort($temp);
+                }
+                else {
+                    natcasesort($temp);
+                }
+                if (strtoupper($order) != 'ASC') {
+                    $temp = array_reverse($temp, TRUE);
+                }
+            }
+
+            foreach (array_keys($temp) as $key) {
+                if (is_numeric($key)) {
+                    $sorted[] = $array[$key];
+                }
+                else {
+                    $sorted[$key] = $array[$key];
+                }
+            }
+
+            return $sorted;
+        }
+        else {
+            return array();
+        }
     }
 
     /**
@@ -355,60 +436,6 @@ class Func {
     }
 
     /**
-     * Sort a multi dimensional array by an index.
-     * @param array   $array         Array what need a sort.
-     * @param string  $index         Sort by index.
-     * @param string  $order         Direction of sorting. Default: ASC. Options: ASC, DESC.
-     * @param boolean $natSort       Is natural sorting. Default: FALSE.
-     * @param boolean $caseSensitive Is case sensitive. Default: FALSE.
-     * @return array Sorted array.
-     */
-    public static function sortArrayMulti($array, $index, $order = 'ASC', $natSort = FALSE, $caseSensitive = FALSE) {
-        $order = strtoupper($order);
-        $sorted = array();
-
-        if (is_array($array) && count($array) > 0) {
-            foreach (array_keys($array) as $key) {
-                $temp[$key] = $array[$key][$index];
-            }
-
-            if ( !$natSort) {
-                if (strtoupper($order) == 'ASC') {
-                    asort($temp);
-                }
-                else {
-                    arsort($temp);
-                }
-            }
-            else {
-                if ($caseSensitive === TRUE) {
-                    natsort($temp);
-                }
-                else {
-                    natcasesort($temp);
-                }
-                if (strtoupper($order) != 'ASC') {
-                    $temp = array_reverse($temp, TRUE);
-                }
-            }
-
-            foreach (array_keys($temp) as $key) {
-                if (is_numeric($key)) {
-                    $sorted[] = $array[$key];
-                }
-                else {
-                    $sorted[$key] = $array[$key];
-                }
-            }
-
-            return $sorted;
-        }
-        else {
-            return array();
-        }
-    }
-
-    /**
      * Removes element from array by its key.
      * @param $array {array} The array.
      * @param $key   {mixed} The key of the element.
@@ -428,6 +455,25 @@ class Func {
      */
     public static function removeFromArrayByValue($array, $element) {
         return array_diff($array, array($element));
+    }
+
+    /**
+     * Decide if the given array is sequential or not.
+     * @param array $array Variable to check.
+     * @return bool True if sequential, false otherwise.
+     * @todo What to do with empty arrays? Right now it gives back false.
+     */
+    public static function isArraySequential(array $array) {
+        return (array_keys($array) === range(0, count($array) - 1));
+    }
+
+    /**
+     * Gives back a random element from the array.
+     * @param array $array Input elements.
+     * @return mixed Output element.
+     */
+    public static function getRandomArrayElem(array $array) {
+        return $array[mt_rand(0, count($array) - 1)];
     }
 
 

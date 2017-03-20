@@ -4,7 +4,7 @@ namespace Egf\Base\Core;
 
 /**
  * Class DbCon
- * @todo sPathToConfig
+ * @todo Config loader class... (log env for example...)
  */
 class DbCon {
 
@@ -27,7 +27,7 @@ class DbCon {
     protected $iAffectedRows = 0;
 
     /** @var string Path to the config file. */
-    protected $sPathToConfig = __DIR__ . '/../../../../config/';
+    protected $sPathToConfig = '/config/';
 
 
     /**
@@ -124,10 +124,7 @@ class DbCon {
             return $xResult;
         }
         else {
-            if ($this->bDebug) {
-                echo '<hr />Invalid Sql query!<br />' . $sQuery . '<br />' . var_export($aParams, TRUE) . '<hr />';
-            }
-
+            Log::error('Invalid Sql query! --- ' . $sQuery . ' --- ' . var_export($aParams, TRUE));
             throw new \Exception('Invalid Sql query!');
         }
     }
@@ -199,7 +196,7 @@ class DbCon {
     protected function loadConfig() {
         $aResult = [];
 
-        $sConfigFile = $this->sPathToConfig . 'database.conf';
+        $sConfigFile = Util::trimSlash($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR .  Util::trimShash($this->sPathToConfig) . '/database.conf';
         $rFile = fopen($sConfigFile, 'r');
         if (is_resource($rFile)) {
             while ( !feof($rFile)) {

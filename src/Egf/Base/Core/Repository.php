@@ -2,8 +2,11 @@
 
 namespace Egf\Base\Core;
 
+use Egf\Base\Util;
+
 /**
  * Class Repository
+ * @todo Add insert/update/delete queries and run them once.
  */
 class Repository {
 
@@ -56,7 +59,7 @@ class Repository {
 	 * @return object
 	 */
 	public function find( $iId ) {
-		return $this->findOneBy( [ 'Id' => $iId ] );
+		return $this->findOneBy( [ 'id' => $iId ] );
 	}
 
 	/**
@@ -112,9 +115,6 @@ class Repository {
 
 		// From.
 		$sFrom = ' FROM ' . $this->getTableName() . ' ';
-
-		// Join. todo?
-		$sJoin = '';
 
 		// Where.
 		$sWhere      = '';
