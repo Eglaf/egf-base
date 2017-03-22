@@ -28,38 +28,58 @@ class Log {
 
     /**
      * Add info.
-     * @param string $sRow
+     * @param string  $sRow
+     * @param boolean $bDebugInfo
      */
-    public static function info($sRow) {
-        static::add('info', $sRow);
+    public static function info($sRow, $bDebugInfo = FALSE) {
+        static::add('info', $sRow, $bDebugInfo);
     }
 
     /**
      * Add warning.
-     * @param string $sRow
+     * @param string  $sRow
+     * @param boolean $bDebugInfo
      */
-    public static function warning($sRow) {
-        static::add('warning', $sRow);
+    public static function warning($sRow, $bDebugInfo = FALSE) {
+        static::add('warning', $sRow, $bDebugInfo);
     }
 
     /**
-     * Add error.
-     * @param string $sRow
+     * Same as addWarning().
+     * @param string  $sRow
+     * @param boolean $bDebugInfo
      */
-    public static function error($sRow) {
-        static::add('error', $sRow);
+    public static function warn($sRow, $bDebugInfo = FALSE) {
+        static::warning($sRow, $bDebugInfo);
+    }
+
+
+    /**
+     * Add error.
+     * @param string  $sRow
+     * @param boolean $bDebugInfo
+     */
+    public static function error($sRow, $bDebugInfo = FALSE) {
+        static::add('error', $sRow, $bDebugInfo);
     }
 
 
     /**
      * Add to log.
-     * @param string $sType
-     * @param string $sRow
+     * @param string  $sType
+     * @param string  $sRow
+     * @param boolean $bDebugInfo
      */
-    protected static function add($sType, $sRow) {
+    protected static function add($sType, $sRow, $bDebugInfo = FALSE) {
         static::init();
 
         $sLine = date('Y-m-d H:i:s', time() + (static::$iHourModifier * 3600)) . ' --- ' . static::getType($sType) . ' --- ' . $sRow . PHP_EOL;
+        if ($bDebugInfo) {
+            $aDebug = debug_backtrace(NULL);
+            $sLine .= ' --- The line ' . $aDebug[1]['line'] . ' in ' . $aDebug[1]['file'];
+        }
+        $sLine .= PHP_EOL;
+
         fwrite(static::$rLog, $sLine);
     }
 
