@@ -6,24 +6,24 @@ use Egf\Base\Util;
 
 /**
  * Static class Log
- * @todo Don't log info in prod environment...
+ * @todo Don't log info in prod environment... config reader class... Conf::get(), Conf::set() ?
  */
 class Log {
 
     /** @var string Directory. */
-    static $sDir = 'log/';
+    protected static $sDir = 'log/';
 
     /** @var string File. */
-    static $sFile = '';
+    protected static $sFile = '';
 
     /** @var resource Opened file. */
-    static $rLog = NULL;
+    protected static $rLog = NULL;
 
-    /** @var int Add to hour or cut from it. */
-    static $iHourModifier = 1;
+    /** @var int Add to hour or cut from it. @todo load from config? */
+    protected static $iHourModifier = 1;
 
     /** @var bool Decide if it was initialized. */
-    static $bInitialized = FALSE;
+    protected static $bInitialized = FALSE;
 
 
     /**
