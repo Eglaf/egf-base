@@ -53,7 +53,6 @@ class Log {
         static::warning($sRow, $bDebugInfo);
     }
 
-
     /**
      * Add error.
      * @param string  $sRow
@@ -61,6 +60,15 @@ class Log {
      */
     public static function error($sRow, $bDebugInfo = FALSE) {
         static::add('error', $sRow, $bDebugInfo);
+    }
+
+    /**
+     * New line in log.
+     * @param int $iPadding
+     * @return string
+     */
+    public static function nl($iPadding = 0) {
+        return PHP_EOL . str_repeat(' ', (36 + $iPadding));
     }
 
 
@@ -76,7 +84,7 @@ class Log {
         $sLine = date('Y-m-d H:i:s', time() + (static::$iHourModifier * 3600)) . ' --- ' . static::getType($sType) . ' --- ' . $sRow . PHP_EOL;
         if ($bDebugInfo) {
             $aDebug = debug_backtrace(NULL);
-            $sLine .= ' --- The line ' . $aDebug[1]['line'] . ' in ' . $aDebug[1]['file'];
+            $sLine .= static::nl() . 'The line ' . $aDebug[2]['line'] . ' in ' . $aDebug[2]['file'];
         }
         $sLine .= PHP_EOL;
 
