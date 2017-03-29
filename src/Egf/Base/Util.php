@@ -265,12 +265,36 @@ class Util {
     }
 
     /**
+     * Similar to the builtin explode, but in case of empty input string, it gives back an empty array... as it should be in the first place.
+     * It does not have a limit parameter, because it causes a problem. Passing NULL in variables is used 1 and fracks up the whole thing.
+     * Trims the string instead.
+     * @param string $sDelimiter The delimiter string.
+     * @param string $sInput     The variable to explode.
+     * @param string $sTrim      Trim characters from string.
+     * @return array             Fragments of the input string.
+     */
+    public static function trimExplode($sDelimiter, $sInput, $sTrim = '') {
+        $sInput = trim($sInput, $sTrim);
+
+        return (strlen($sInput) ? explode($sDelimiter, $sInput) : []);
+    }
+
+    /**
+     * Check if the given parameter is a valid eMail or not.
+     * @param string $sEmail
+     * @return bool
+     */
+    public static function isValidEmail($sEmail) {
+        return ( !filter_var($sEmail, FILTER_VALIDATE_EMAIL) === FALSE);
+    }
+
+    /**
      * Check if the given string is a valid ip address.
      * @param string $sIp Variable to check. If null, ask server for remote ip address.
      * @return bool True if valid ip address.
      */
     public static function isValidIpAddress($sIp = NULL) {
-        return (filter_var(($sIp ? $sIp : $_SERVER['REMOTE_ADDR']) , FILTER_VALIDATE_IP) !== FALSE);
+        return (filter_var(($sIp ? $sIp : $_SERVER['REMOTE_ADDR']), FILTER_VALIDATE_IP) !== FALSE);
     }
 
 
